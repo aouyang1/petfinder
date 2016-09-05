@@ -5,31 +5,34 @@ import json
 import csv
 from time import sleep
 
-PF_KEY=os.environ["PF_KEY"]
 
+def get_zip_codes():
+    f_zip = open('us_postal_codes.csv','r')
+    f_data = csv.reader(f_zip)
+
+    zip_codes = []
+    for record in f_data:
+        zip_code = record[0]
+        if len(zip_code) > 0:
+            try:
+                zip_int = int(zip_code)
+                zip_codes.append(zip_code)
+            except:
+                print("must be a number as string")
+
+    return zip_codes
+
+
+PF_KEY=os.environ["PF_KEY"]
 p = Petfinder(PF_KEY)
 
-f_zip = open('us_postal_codes.csv','r')
-f_data = csv.reader(f_zip)
-
-zip_codes = []
-for record in f_data:
-    zip_code = record[0]
-    if len(zip_code) > 0:
-        try:
-            zip_int = int(zip_code)
-            zip_codes.append(zip_code)
-        except:
-            print("must be a number as string")
-
-print(len(zip_codes))
-
 f = open('shelter.json', 'w')
-
 
 page_size = 1000
 
 shelter_dict = {}
+
+zip_codes = get_zip_codes()
 
 for zipcode in zip_codes:
     sleep(2)
