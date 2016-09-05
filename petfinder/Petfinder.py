@@ -36,6 +36,39 @@ class Petfinder(object):
 
         return resp['petfinder']['breeds']['breed']
 
+    def pet_find(self, location, animal=None, breed=None, size=None, sex=None, age=None, count=25, offset=0):
+        args = {"key": self.key,
+                "location": location,
+                "count": count,
+                "offset": offset,
+                "format": "json"}
+
+        if offset % count != 0:
+            print("invalid offset. must be multiple of count")
+            return []
+
+        if animal is not None:
+            args["animal"] = animal
+
+        if breed is not None:
+            args["breed"] = breed
+
+        if size is not None:
+            args["size"] = size
+
+        if sex is not None:
+            args["sex"] = sex
+
+        if age is not None:
+            args["age"] = age
+
+        api_endpoint = "".join([self.endpoint, "pet.find"])
+
+        resp = requests.get(api_endpoint, params=args).json()
+        self.remove_extra_tag(resp)
+
+        return resp['petfinder']['pets']['pet']
+
     def pet_get(self, id):
         args = {"key": self.key,
                 "id": id,
@@ -48,27 +81,31 @@ class Petfinder(object):
 
         return resp['petfinder']['pet']
 
-    def shelter_find(self, location, offset=0, count=25):
+    def shelter_find(self, location, count=25, offset=0):
         args = {"key": self.key,
                 "location": location,
-                "offset": offset,
                 "count": count,
+                "offset": offset,
                 "format": "json"}
+
+        if offset % count != 0:
+            print("invalid offset. must be multiple of count")
+            return []
 
         api_endpoint = "".join([self.endpoint, "shelter.find"])
 
         resp = requests.get(api_endpoint, params=args).json()
         self.remove_extra_tag(resp)
 
-        output = resp['petfinder']['shelters']['shelter']
+        shelters = resp['petfinder']['shelters']
+        output = shelters['shelter'] if 'shelter' in shelters else []
 
         return output if isinstance(output, list) else [output]
 
-    def shelter_get_pets(self, id, status="A", offset=0, count=25, output="basic"):
+    def shelter_get_pets(self, id, status="A", count=25, output="basic"):
         args = {"key": self.key,
                 "id": id,
                 "status": status,
-                "offset": offset,
                 "count": count,
                 "output": output,
                 "format": "json"}
@@ -78,7 +115,8 @@ class Petfinder(object):
         resp = requests.get(api_endpoint, params=args).json()
         self.remove_extra_tag(resp)
 
-        output = resp['petfinder']['pets']['pet']
+        pets = resp['petfinder']['pets']
+        output = pets['pet'] if 'pet' in pets else []
 
         return output if isinstance(output, list) else [output]
 
