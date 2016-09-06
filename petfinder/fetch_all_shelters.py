@@ -7,7 +7,7 @@ from time import sleep
 
 
 def get_zip_codes():
-    f_zip = open('us_postal_codes.csv','r')
+    f_zip = open('postal_codes.csv','r')
     f_data = csv.reader(f_zip)
 
     zip_codes = []
@@ -35,12 +35,18 @@ shelter_dict = {}
 zip_codes = get_zip_codes()
 
 for zipcode in zip_codes:
-    sleep(2)
-    shelters = p.shelter_find(location=zipcode,count=page_size)
-    for shelter in shelters:
-        if shelter["id"] not in shelter_dict:
-            shelter_dict[shelter["id"]] = 1
+    sleep(1)
+    print("fetching zipcode: {}".format(zipcode))
+    try:
+        shelters = p.shelter_find(location=str(zipcode),count=page_size)
+        for shelter in shelters:
+            if shelter["id"] not in shelter_dict:
+                shelter_dict[shelter["id"]] = 1
 
-            print(shelter["state"], shelter["city"], shelter["id"], len(shelter_dict))
-            f.write("{}\n".format(json.dumps(shelter)))
+                print(shelter["state"], shelter["city"], shelter["id"], len(shelter_dict))
+                f.write("{}\n".format(json.dumps(shelter)))
+            else:
+                print("shelter id: {} already found".format(shelter["id"]))
+    except:
+        print("zipcode not found: {}".format(zipcode))
 
